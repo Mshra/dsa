@@ -14,7 +14,7 @@ typedef struct {
  * and setting its first element as a NULL_ITEM
  */
 Array *create_array() {
-  Array *_tmp_array = (Array *)malloc(sizeof(Array));
+  Array *_tmp_array = (Array *)malloc(sizeof(int) + 1 * sizeof(int));
 
   // check if '_tmp_array' is allocated successfully
   if (_tmp_array == NULL) {
@@ -70,7 +70,10 @@ void allocate_null(Array *_array) {
 // inserts key at the end of '_array'
 void insert(Array *_array, int key) {
   if (_array->items[_array->length - 1] != NULL_ITEM) {
-    Array *_double_array = malloc(sizeof(Array));
+    Array *_double_array =
+        malloc(sizeof(int) + (2 * _array->length) * sizeof(int));
+
+    // check for allocation success
     if (_double_array == NULL) {
       printf("array allocation failed!");
       exit(EXIT_FAILURE);
@@ -78,13 +81,12 @@ void insert(Array *_array, int key) {
     _double_array->length = 2 * _array->length;
     allocate_null(_double_array);
     copy(_array, _double_array);
-    insert(_double_array, key);
+    _double_array->items[_array->length] = key;
 
-    // FIX: the _array at this point is Array: { 8, }
-    // and the _double_array is Array: { 8, 7, }
-    *_array = *_double_array;
-    // at this point: _array = Array: { 8, NULL, }
-    // at this point: _double_array = Array: { 8, 7, }
+    // FIX: the _array is now _double_array only in this scope
+    int **tmp = &_array;
+    *tmp = _double_array;
+    print_array(_array);
   } else {
     _array->items[search(_array, NULL_ITEM)] = key;
   }
